@@ -1,20 +1,20 @@
 /* HeroUI's controls compiled on their own: its theme is referenced, never emitted, so nothing reaches :root and a host app's Tailwind stays as it was. */
 @reference "@heroui/styles";
-@import "../node_modules/@heroui/styles/dist/components/label.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/description.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/input.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/textfield.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/popover.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/list-box.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/list-box-item.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/select.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/toggle-button.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/toggle-button-group.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/slider.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/color-swatch.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/color-area.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/color-slider.css" layer(components);
-@import "../node_modules/@heroui/styles/dist/components/color-picker.css" layer(components);
+@import "@heroui/styles/components/label.css" layer(components);
+@import "@heroui/styles/components/description.css" layer(components);
+@import "@heroui/styles/components/input.css" layer(components);
+@import "@heroui/styles/components/textfield.css" layer(components);
+@import "@heroui/styles/components/popover.css" layer(components);
+@import "@heroui/styles/components/list-box.css" layer(components);
+@import "@heroui/styles/components/list-box-item.css" layer(components);
+@import "@heroui/styles/components/select.css" layer(components);
+@import "@heroui/styles/components/toggle-button.css" layer(components);
+@import "@heroui/styles/components/toggle-button-group.css" layer(components);
+@import "@heroui/styles/components/slider.css" layer(components);
+@import "@heroui/styles/components/color-swatch.css" layer(components);
+@import "@heroui/styles/components/color-area.css" layer(components);
+@import "@heroui/styles/components/color-slider.css" layer(components);
+@import "@heroui/styles/components/color-picker.css" layer(components);
 
 /* HeroUI's tokens on the page's palette, literal since popovers portal outside the page: grey fills, ink when picked, no rings */
 @layer components {

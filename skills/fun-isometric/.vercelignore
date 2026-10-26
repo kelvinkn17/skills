@@ -1,0 +1,11 @@
+# Vercel builds the site from these alone, so the skill, its tools and any local env never upload
+/*
+!/index.html
+!/main.tsx
+!/vite.config.ts
+!/package.json
+!/bun.lock
+!/vercel.json
+!/site
+!/kit
+!/public

@@ -6,6 +6,8 @@ Agent skills I build and use. Each lives in `skills/<name>/` with its `SKILL.md`
 | --- | --- |
 | [fun-isometric](skills/fun-isometric) | Draws isometric stickers and animates them on real keyframes. Any object, any palette, four facings. [Try the generator](https://skills.klvn.dev/fun-isometric) |
 
+fun-isometric is heavily inspired by the stickers in [Slush](https://slush.app).
+
 ## Install
 
 ```sh

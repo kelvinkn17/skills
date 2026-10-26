@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "rm -rf dist && vite build && cd .. && if [ -n \"$(git ls-files -o --exclude-standard fun-isometric)\" ]; then git ls-files -o --exclude-standard fun-isometric >&2; echo 'zip ships tracked files only: commit or ignore the files above' >&2; exit 1; fi && git ls-files fun-isometric | zip -qX fun-isometric/dist/fun-isometric/fun-isometric.zip -@",
+    "build": "vite build",
     "preview": "vite preview",
-    "deploy": "bunx vercel@latest build --prod && bunx vercel@latest deploy --prebuilt --prod"
+    "zip": "cd .. && if [ -n \"$(git ls-files -o --exclude-standard fun-isometric)\" ]; then git ls-files -o --exclude-standard fun-isometric >&2; echo 'zip ships tracked files only: commit or ignore the files above' >&2; exit 1; fi && rm -f fun-isometric/public/fun-isometric.zip && git ls-files fun-isometric | zip -qX fun-isometric/public/fun-isometric.zip -@",
+    "deploy": "bun run zip && bunx vercel@latest deploy --prod"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",

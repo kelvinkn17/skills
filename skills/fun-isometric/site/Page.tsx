@@ -457,7 +457,7 @@ export default function Page({ className, children }: { className?: string; chil
 
       <footer className="fi-foot">
         <p>
-          MIT licensed. Made by <a href="https://www.klvn.dev">Kelvin</a>.
+          MIT licensed. Made by <a href="https://www.klvn.dev">Kelvin</a>, heavily inspired by <a href="https://slush.app">Slush</a>.
         </p>
         <a href={REPO} onClick={() => track('Open GitHub', { from: 'footer' })}>
           Source on GitHub
