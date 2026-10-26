@@ -1,17 +1,27 @@
+import './ui.css'
 import './fun.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ACCENTS, RISO, VIEWS, brand, clock, ellipse, hue, mono, pill, rect, spark } from '../kit/fun'
-import { ICONS, chat, gift, piggy, trophy } from '../kit/icons'
+import { track } from '@vercel/analytics'
+import { ACCENTS, PALETTES, RISO, VIEWS, brand, clock, ellipse, mono, pill, rect, spark } from '../kit/fun'
+import { ICONS, pen } from '../kit/icons'
 import { bounce, clasp, deal, drift, float, hop, jolt, latch, press, slide, sway, toss, twist, wiggle, wobble } from '../kit/motions'
 import { Sticker } from '../kit/Sticker'
+import { ColorArea, ColorPicker, ColorSlider, ColorSwatch, Input, Label, ListBox, Select, Slider, TextField, ToggleButton, ToggleButtonGroup } from '@heroui/react'
 import type { CSSProperties, ReactNode } from 'react'
-import type { Icon, Motion, Palette, View } from '../kit/fun'
+import type { Icon, Motion, Palette, PaletteName, View } from '../kit/fun'
 
 const REPO = 'https://github.com/kelvinkn17/skills'
-const HERO_COMMAND = '/fun-isometric a piggy bank that wobbles when a coin drops in'
+const MAKER = { name: 'Kelvin Adithya', url: 'https://x.com/KelvinAdithya', follow: 'https://x.com/intent/follow?screen_name=KelvinAdithya' }
+const EXAMPLE = 'a pen scribbling on a square pad'
+
+// one command for every agent, the CLI asks which ones and where; the zip skips Node
+const SITE = 'https://skills.klvn.dev/fun-isometric'
+const INSTALL = 'npx skills add kelvinkn17/skills@fun-isometric'
+const UNZIP = 'unzip fun-isometric.zip -d ~/.claude/skills'
 
 // the presets each sticker moves on, shown under it in the wall
 const MOVES: Record<string, string> = {
+  pen: 'scribble, twinkle',
   folder: 'toss',
   heart: 'hop, twinkle',
   coins: 'bounce, glint',
@@ -27,7 +37,6 @@ const MOVES: Record<string, string> = {
   streak: 'flicker, bob',
   notes: 'erase, sway',
   play: 'press',
-  piggy: 'nudge, fall',
   mailbox: 'jolt, spring',
   headphones: 'wobble, twinkle',
   trophy: 'hop, twinkle',
@@ -38,19 +47,52 @@ const MOVES: Record<string, string> = {
   battery: 'float, twinkle',
 }
 
-const INSTALLS: Array<[string, string, string]> = [
-  ['With npx', 'npx skills add kelvinkn17/skills --skill fun-isometric', 'Installs into Claude Code or any agent that reads skills. Then ask for /fun-isometric.'],
-  ['As a Claude Code plugin', '/plugin marketplace add kelvinkn17/skills\n/plugin install fun-isometric@kelvinkn17-skills', 'It shows up as /fun-isometric:fun-isometric.'],
-]
-
-function useCopy() {
-  const [copied, setCopied] = useState('')
-  const copy = (text: string) =>
+// Copy rolls up into a drawn check and Copied on a spring, and the pill bounces once per copy
+function CopyButton({ text, what, disabled }: { text: string; what: 'install' | 'maker'; disabled?: boolean }) {
+  const [hits, setHits] = useState(0)
+  const [done, setDone] = useState(false)
+  const timer = useRef(0)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const copy = () =>
     void navigator.clipboard.writeText(text).then(() => {
-      setCopied(text)
-      setTimeout(() => setCopied(''), 1600)
+      track('Copy command', { what })
+      setHits((n) => n + 1)
+      setDone(true)
+      clearTimeout(timer.current)
+      timer.current = window.setTimeout(() => setDone(false), 1800)
     })
-  return [copied, copy] as const
+  return (
+    <button type="button" className="fi-btn fi-gel fi-copy" data-done={done ? (hits % 2 ? 'a' : 'b') : undefined} onClick={copy} disabled={disabled}>
+      <span className="fi-copy-idle" aria-hidden={done}>
+        Copy
+      </span>
+      <span className="fi-copy-done" aria-hidden={!done}>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+          <path d="M3.5 8.5l3 3 6-7" />
+        </svg>
+        Copied
+      </span>
+    </button>
+  )
+}
+
+function Install() {
+  return (
+    <div className="fi-install" id="install">
+      <p className="fi-label">Add it to Claude Code, Codex or any agent with one command.</p>
+      <div className="fi-command">
+        <code>{INSTALL}</code>
+        <CopyButton text={INSTALL} what="install" />
+      </div>
+      <p className="fi-label">Or download the skill and unzip it into your skills folder.</p>
+      <div className="fi-command">
+        <code>{UNZIP}</code>
+        <a className="fi-btn" href={`${SITE}/fun-isometric.zip`} download onClick={() => track('Download zip')}>
+          Download
+        </a>
+      </div>
+    </div>
+  )
 }
 
 const SPEEDS = [1, 0.5, 0.25]
@@ -58,14 +100,12 @@ const SPEEDS = [1, 0.5, 0.25]
 function Controls() {
   const [speed, setSpeed] = useState(clock.speed)
   const [paused, setPaused] = useState(clock.paused)
-  const scrub = useRef<HTMLInputElement>(null)
-  const label = useRef<HTMLSpanElement>(null)
+  const [frame, setFrame] = useState(0)
+  // the slider follows the page clock, one render per whole frame
   useEffect(() => {
     let raf = 0
     const tick = () => {
-      const f = Math.floor(((clock.frame % 180) + 180) % 180)
-      if (scrub.current && document.activeElement !== scrub.current) scrub.current.value = String(f)
-      if (label.current) label.current.textContent = String(f).padStart(3, '0')
+      setFrame(Math.floor(((clock.frame % 180) + 180) % 180))
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
@@ -77,50 +117,63 @@ function Controls() {
   }
   return (
     <div className="fi-controls">
-      <div className="fi-seg" role="group" aria-label="Speed">
+      <ToggleButtonGroup
+        aria-label="Speed"
+        size="sm"
+        disallowEmptySelection
+        selectedKeys={[String(speed)]}
+        onSelectionChange={(keys) => {
+          const next = Number([...keys][0])
+          clock.speed = next
+          setSpeed(next)
+        }}
+      >
         {SPEEDS.map((s) => (
-          <button key={s} type="button" aria-pressed={speed === s} onClick={() => ((clock.speed = s), setSpeed(s))}>
+          <ToggleButton key={s} id={String(s)}>
             {s === 1 ? '1x' : s === 0.5 ? '½x' : '¼x'}
-          </button>
+          </ToggleButton>
         ))}
-      </div>
+      </ToggleButtonGroup>
       <button type="button" className="fi-btn" aria-pressed={paused} onClick={() => pause(!paused)}>
         {paused ? 'Play' : 'Pause'}
       </button>
-      <label className="fi-scrub">
-        <span className="fi-frame">
-          Frame <span ref={label}>000</span>
-        </span>
-        <input
-          ref={scrub}
-          type="range"
-          min={0}
-          max={179}
-          step={1}
-          defaultValue={0}
-          aria-label="Frame"
-          onInput={(e) => {
-            pause(true)
-            clock.frame = Number(e.currentTarget.value)
-          }}
-        />
-      </label>
+      <Slider
+        className="fi-scrub"
+        aria-label="Frame"
+        minValue={0}
+        maxValue={179}
+        value={frame}
+        formatOptions={{ minimumIntegerDigits: 3 }}
+        onChange={(v) => {
+          pause(true)
+          clock.frame = v as number
+          setFrame(v as number)
+        }}
+      >
+        <Slider.Output className="fi-frame" />
+        <Slider.Track>
+          <Slider.Fill />
+          <Slider.Thumb />
+        </Slider.Track>
+      </Slider>
     </div>
   )
 }
 
 // The generator: everything the skill takes, picked by eye, written out as the command to paste
 
-type Tone = { kind: 'riso' } | { kind: 'brand' | 'mono'; hex: string } | { kind: 'hue'; deg: number }
+type Tone = { kind: 'set'; name: PaletteName } | { kind: 'brand'; hex: string; two: string } | { kind: 'mono'; hex: string }
 
 const paletteOf = (t: Tone): Palette | undefined =>
-  t.kind === 'brand' ? brand(t.hex) : t.kind === 'mono' ? mono(t.hex) : t.kind === 'hue' ? hue(t.deg) : undefined
+  t.kind === 'brand' ? brand(t.hex, t.two) : t.kind === 'mono' ? mono(t.hex) : t.name === 'riso' ? undefined : PALETTES[t.name]
 
-const TONES: Array<[Tone['kind'], string]> = [
-  ['riso', 'Riso'],
-  ['brand', 'Brand'],
-  ['mono', 'One colour'],
-  ['hue', 'Hue shift'],
+const SETS = Object.keys(PALETTES) as Array<PaletteName>
+// brand pairs that start somewhere good, the pickers take it from there
+const PAIRS: Array<[string, string]> = [
+  ['#0a84ff', '#ff7a1a'],
+  ['#ff58a8', '#2b50e0'],
+  ['#7c5cff', '#16b88a'],
+  ['#ef4444', '#1e3a8a'],
 ]
 
 const FACING: Array<[View, string, string]> = [
@@ -149,7 +202,7 @@ const MOTIONS: Array<[string, string, Motion | ReadonlyArray<Motion>]> = [
   ['sway', 'sway: a slow lean, idle', sway],
 ]
 
-const IDEAS = ['a piggy bank', 'a rocket', 'a mailbox', 'headphones', 'a trophy']
+const IDEAS = ['a pen', 'a rocket', 'a mailbox', 'headphones', 'a trophy']
 
 // a card with a header, a coin and a label: enough parts to see which way a face turns
 function sample(view: View, m?: Motion | ReadonlyArray<Motion>): Icon {
@@ -177,22 +230,63 @@ function sample(view: View, m?: Motion | ReadonlyArray<Motion>): Icon {
 }
 const SAMPLES = Object.fromEntries(FACING.map(([v]) => [v, sample(v)])) as Record<View, Icon>
 
+// a palette to pick, shown as its strong accents so the choice is made by eye; the pale tint would vanish on the picked card
+const STRIP = ACCENTS.filter((k) => k !== 'tint')
+
+function Swatch({ label, palette, on, pick }: { label: string; palette?: Palette; on: boolean; pick: () => void }) {
+  return (
+    <button type="button" className="fi-pal" aria-pressed={on} onClick={pick}>
+      <span className="fi-strip" aria-hidden>
+        {STRIP.map((k) => (
+          <i key={k} style={{ background: (palette ?? RISO)[k] }} />
+        ))}
+      </span>
+      {label}
+    </button>
+  )
+}
+
+function Pick({ label, value, set }: { label: string; value: string; set: (hex: string) => void }) {
+  return (
+    <ColorPicker value={value} onChange={(c) => set(c.toString('hex').toLowerCase())}>
+      <ColorPicker.Trigger className="fi-pick">
+        <ColorSwatch />
+        <span>
+          {label}
+          <span className="fi-frame">{value}</span>
+        </span>
+      </ColorPicker.Trigger>
+      <ColorPicker.Popover className="fi-pop">
+        <ColorArea aria-label={`${label} colour`} colorSpace="hsb" xChannel="saturation" yChannel="brightness">
+          <ColorArea.Thumb />
+        </ColorArea>
+        <ColorSlider aria-label="Hue" channel="hue" colorSpace="hsb">
+          <ColorSlider.Track>
+            <ColorSlider.Thumb />
+          </ColorSlider.Track>
+        </ColorSlider>
+      </ColorPicker.Popover>
+    </ColorPicker>
+  )
+}
+
 function Maker({ tone, setTone }: { tone: Tone; setTone: (t: Tone) => void }) {
   const [thing, setThing] = useState('')
   const [motion, setMotion] = useState('auto')
   const [view, setView] = useState<View>('right')
-  const [copied, copy] = useCopy()
   const palette = useMemo(() => paletteOf(tone), [tone])
   const preview = useMemo(() => sample(view, MOTIONS.find(([id]) => id === motion)?.[2]), [view, motion])
-  const colours = tone.kind === 'brand' || tone.kind === 'mono' ? `colours ${tone.kind} ${tone.hex}` : tone.kind === 'hue' ? `colours hue ${tone.deg}` : ''
+  const colours = tone.kind === 'brand' ? `colours brand ${tone.hex} ${tone.two}` : tone.kind === 'mono' ? `colours mono ${tone.hex}` : tone.name === 'riso' ? '' : `colours ${tone.name}`
   const parts = [thing.trim() || '<object>', motion !== 'auto' && `motion ${motion}`, colours, view !== 'right' && FACING.find(([v]) => v === view)?.[2]]
   const command = `/fun-isometric ${parts.filter(Boolean).join(', ')}`
   return (
     <div className="fi-maker">
       <div className="fi-fields">
-        <label className="fi-field">
-          <span className="fi-label">Object</span>
-          <input className="fi-input" value={thing} onChange={(e) => setThing(e.target.value)} placeholder="a piggy bank that wobbles when a coin drops in" />
+        <div className="fi-field">
+          <TextField value={thing} onChange={setThing} className="fi-field">
+            <Label className="fi-label">Object</Label>
+            <Input className="fi-input" placeholder={EXAMPLE} />
+          </TextField>
           <span className="fi-chips">
             {IDEAS.map((idea) => (
               <button key={idea} type="button" className="fi-chip" onClick={() => setThing(idea)}>
@@ -200,52 +294,58 @@ function Maker({ tone, setTone }: { tone: Tone; setTone: (t: Tone) => void }) {
               </button>
             ))}
           </span>
-        </label>
+        </div>
 
-        <label className="fi-field">
-          <span className="fi-label">Motion</span>
-          <select className="fi-input" value={motion} onChange={(e) => setMotion(e.target.value)}>
-            {MOTIONS.map(([id, label]) => (
-              <option key={id} value={id}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Select className="fi-field" value={motion} onChange={(k) => k !== null && setMotion(String(k))}>
+          <Label className="fi-label">Motion</Label>
+          <Select.Trigger className="fi-input">
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="fi-pop">
+            <ListBox>
+              {MOTIONS.map(([id, label]) => (
+                <ListBox.Item key={id} id={id} textValue={label}>
+                  {label}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
 
         <fieldset className="fi-field">
           <legend className="fi-label">Colours</legend>
-          <div className="fi-seg" role="group" aria-label="Colours">
-            {TONES.map(([kind, label]) => (
-              <button
-                key={kind}
-                type="button"
-                aria-pressed={tone.kind === kind}
-                onClick={() => setTone(kind === 'riso' ? { kind } : kind === 'hue' ? { kind, deg: 140 } : { kind, hex: 'hex' in tone ? tone.hex : '#2b6cff' })}
-              >
-                {label}
-              </button>
+          <div className="fi-palettes">
+            {SETS.map((name) => (
+              <Swatch key={name} label={name[0].toUpperCase() + name.slice(1)} palette={PALETTES[name]} on={tone.kind === 'set' && tone.name === name} pick={() => setTone({ kind: 'set', name })} />
             ))}
+            <Swatch label="Brand" palette={tone.kind === 'brand' ? palette : brand(...PAIRS[0])} on={tone.kind === 'brand'} pick={() => tone.kind !== 'brand' && setTone({ kind: 'brand', hex: PAIRS[0][0], two: PAIRS[0][1] })} />
+            <Swatch label="One colour" palette={tone.kind === 'mono' ? palette : mono('#2b6cff')} on={tone.kind === 'mono'} pick={() => tone.kind !== 'mono' && setTone({ kind: 'mono', hex: '#2b6cff' })} />
           </div>
-          <span className="fi-tune">
-            <span className="fi-swatches" aria-hidden>
-              {ACCENTS.map((k) => (
-                <i key={k} style={{ background: (palette ?? RISO)[k] }} />
-              ))}
-            </span>
-            {(tone.kind === 'brand' || tone.kind === 'mono') && (
-              <>
-                <input type="color" value={tone.hex} aria-label="Colour" onChange={(e) => setTone({ kind: tone.kind, hex: e.target.value })} />
-                <span className="fi-frame">{tone.hex}</span>
-              </>
-            )}
-            {tone.kind === 'hue' && (
-              <>
-                <input type="range" min={0} max={359} value={tone.deg} aria-label="Hue shift" onChange={(e) => setTone({ kind: 'hue', deg: Number(e.target.value) })} />
-                <span className="fi-frame">{tone.deg}°</span>
-              </>
-            )}
-          </span>
+          {tone.kind === 'brand' && (
+            <div className="fi-tune">
+              <Pick label="Primary" value={tone.hex} set={(hex) => setTone({ ...tone, hex })} />
+              <Pick label="Secondary" value={tone.two} set={(two) => setTone({ ...tone, two })} />
+              <span className="fi-pairs" role="group" aria-label="Suggested pairs">
+                {PAIRS.map(([hex, two]) => (
+                  <button
+                    key={hex + two}
+                    type="button"
+                    aria-label={`${hex} with ${two}`}
+                    aria-pressed={tone.hex === hex && tone.two === two}
+                    style={{ background: `linear-gradient(135deg, ${hex} 50%, ${two} 50%)` }}
+                    onClick={() => setTone({ kind: 'brand', hex, two })}
+                  />
+                ))}
+              </span>
+            </div>
+          )}
+          {tone.kind === 'mono' && (
+            <div className="fi-tune">
+              <Pick label="Colour" value={tone.hex} set={(hex) => setTone({ kind: 'mono', hex })} />
+            </div>
+          )}
         </fieldset>
 
         <fieldset className="fi-field">
@@ -267,9 +367,7 @@ function Maker({ tone, setTone }: { tone: Tone; setTone: (t: Tone) => void }) {
         </div>
         <div className="fi-command">
           <code>{command}</code>
-          <button type="button" className="fi-btn fi-gel" onClick={() => copy(command)} disabled={!thing.trim()}>
-            {copied === command ? 'Copied' : 'Copy'}
-          </button>
+          <CopyButton text={command} what="maker" disabled={!thing.trim()} />
         </div>
       </div>
     </div>
@@ -281,70 +379,67 @@ const order = ICONS.map((_, i) => i).sort((a, b) => ((a * 7 + 3) % 23) - ((b * 7
 
 // children land before the install section, so a host can add its own sections under the same palette and clock
 export default function Page({ className, children }: { className?: string; children?: ReactNode }) {
-  const [tone, setTone] = useState<Tone>({ kind: 'riso' })
-  const [copied, copy] = useCopy()
+  const [tone, setTone] = useState<Tone>({ kind: 'set', name: 'riso' })
   const palette = useMemo(() => paletteOf(tone), [tone])
   const tint = (palette ?? RISO).tint
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       Object.assign(clock, { speed: 1, paused: false })
-    },
-    [],
-  )
+    }
+  }, [])
   return (
     <main className={className ? `show-fun ${className}` : 'show-fun'} style={{ '--fi-tint': tint } as CSSProperties}>
       <header className="fi-nav">
-        <a className="fi-word" href="#top">
-          fun-isometric
-        </a>
+        <p className="fi-brand">
+          <a className="fi-word" href="#top">
+            fun-isometric
+          </a>
+          <a className="fi-by" href={MAKER.url} target="_blank" rel="noopener">
+            by {MAKER.name}
+          </a>
+        </p>
         <nav className="fi-links" aria-label="Site">
           <a href="#make">Make</a>
-          <a href="#stickers">Stickers</a>
-          <a href={REPO}>GitHub</a>
-          <a className="fi-btn fi-gel" href="#install">
-            Install
+          <a href="#examples">Examples</a>
+          <a className="fi-btn fi-hub" href={REPO} onClick={() => track('Open GitHub', { from: 'nav' })}>
+            GitHub
+          </a>
+          <a className="fi-btn fi-follow" href={MAKER.follow} target="_blank" rel="noopener" aria-label={`Follow ${MAKER.name} on X`} onClick={() => track('Follow on X')}>
+            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden>
+              <path
+                fill="currentColor"
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+              />
+            </svg>
+            Follow
           </a>
         </nav>
       </header>
 
       <section className="fi-hero" id="top">
-        <div className="fi-hero-copy">
-          <h1 className="fi-display">
-            Stickers that move
-            <br />
-            like they mean it.
-          </h1>
-          <p className="fi-lede">
-            A Claude skill that draws isometric stickers and animates them on real keyframes. Say what the object is and what it does, and it
-            comes back drawn, rigged and looping, in any palette.
-          </p>
-          <div className="fi-command fi-hero-command">
-            <code>{HERO_COMMAND}</code>
-            <button type="button" className="fi-btn" onClick={() => copy(HERO_COMMAND)}>
-              {copied === HERO_COMMAND ? 'Copied' : 'Copy'}
-            </button>
-          </div>
+        <div className="fi-emblem">
+          <Sticker icon={pen} enter={0.15} palette={palette} label="A pen scribbling on a square pad" />
         </div>
-        <div className="fi-hero-art">
-          <Sticker icon={piggy} enter={0.15} palette={palette} label="A piggy bank taking a coin" />
-        </div>
+        <h1 className="fi-display">/fun-isometric</h1>
+        <p className="fi-lede">
+          A skill for Claude Code and Codex. Name an object and what it does, and it comes back as an isometric sticker looping on real
+          keyframes, in any palette.
+        </p>
+        <Install />
+        <p className="fi-meta">Start a new session, then ask for <span className="fi-nowrap">/fun-isometric</span>, or <span className="fi-nowrap">$fun-isometric</span> in Codex. Rendering needs Bun, and video needs ffmpeg.</p>
       </section>
 
       <section className="fi-sec" id="make">
         <header className="fi-head">
           <h2 className="fi-h2">Make your own.</h2>
-          <p className="fi-meta">Pick the object, the motion, the colours and the facing, then paste the command into Claude.</p>
+          <p className="fi-meta">Pick the object, the motion, the colours and the facing, then paste the command into your agent.</p>
         </header>
         <Maker tone={tone} setTone={setTone} />
       </section>
 
-      <section className="fi-sec" id="stickers">
+      <section className="fi-sec" id="examples">
         <header className="fi-head">
-          <h2 className="fi-h2">
-            {ICONS.length} stickers.
-            <br />
-            One motion system.
-          </h2>
+          <h2 className="fi-h2">Examples.</h2>
           <Controls />
         </header>
         <ul className="fi-wall">
@@ -358,69 +453,15 @@ export default function Page({ className, children }: { className?: string; chil
         </ul>
       </section>
 
-      <section className="fi-sec">
-        <ul className="fi-cards">
-          <li>
-            <div className="fi-card-art">
-              <Sticker icon={gift} palette={palette} />
-            </div>
-            <p>
-              <strong>Real keyframes.</strong> Every move is a set of After Effects keys with their own easing and arcs, replayed the way
-              lottie-web plays them. Nothing here is a sine wave.
-            </p>
-          </li>
-          <li>
-            <div className="fi-card-art fi-trio">
-              <Sticker icon={chat} palette={brand('#2b6cff')} label="The chat sticker in a blue brand palette" />
-              <Sticker icon={chat} palette={mono('#16a34a')} label="The chat sticker in one green" />
-              <Sticker icon={chat} palette={hue(160)} label="The chat sticker with the hue shifted" />
-            </div>
-            <p>
-              <strong>Any palette.</strong> Colours are roles, not hexes, so a brand colour, one colour or a hue shift repaints every part and
-              keeps what it means.
-            </p>
-          </li>
-          <li>
-            <div className="fi-card-art">
-              <Sticker icon={trophy} palette={palette} />
-            </div>
-            <p>
-              <strong>Ships anywhere.</strong> A React component, a canvas player with no dependencies, or a looping alpha video with its poster
-              frame.
-            </p>
-          </li>
-        </ul>
-      </section>
-
       {children}
-
-      <section className="fi-sec fi-install" id="install">
-        <h2 className="fi-h2">
-          Install it once.
-          <br />
-          Ask for stickers forever.
-        </h2>
-        <ul className="fi-steps">
-          {INSTALLS.map(([title, cmd, note]) => (
-            <li key={title}>
-              <p className="fi-name">{title}</p>
-              <div className="fi-command fi-code">
-                <code>{cmd}</code>
-                <button type="button" className="fi-btn" onClick={() => copy(cmd)}>
-                  {copied === cmd ? 'Copied' : 'Copy'}
-                </button>
-              </div>
-              <p className="fi-meta">{note}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <footer className="fi-foot">
         <p>
           MIT licensed. Made by <a href="https://www.klvn.dev">Kelvin</a>.
         </p>
-        <a href={REPO}>Source on GitHub</a>
+        <a href={REPO} onClick={() => track('Open GitHub', { from: 'footer' })}>
+          Source on GitHub
+        </a>
       </footer>
     </main>
   )

@@ -1,0 +1,8 @@
+{
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "fun-isometric.klvn.dev" }], "destination": "https://skills.klvn.dev/fun-isometric", "permanent": true },
+    { "source": "/", "destination": "/fun-isometric", "permanent": false }
+  ],
+  "rewrites": [{ "source": "/fun-isometric", "destination": "/fun-isometric/index.html" }]
+}

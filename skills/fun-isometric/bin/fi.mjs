@@ -14,7 +14,7 @@ fi frame  <icons.ts> <name> <frame> [--px 800] [--out frame.png] [--bg #ffffff]
 fi export <icons.ts> <name> [--px 400] [--out dir] [--bg #ffffff]
   every frame of the loop at 60fps to <name>.webm (VP9 alpha) and <name>.mp4 (HEVC alpha, Safari), plus <name>.png at the still
   frame for a poster; --bg flattens to H.264 instead
-colours, on sheet, frame and export: --palette '{"main":"#0a84ff"}' (json or a .json file) | --hue <deg> | --brand <#hex> | --mono <#hex>`
+colours, on sheet, frame and export: --palette riso|candy|matcha|sunset|clay|aqua, or '{"main":"#0a84ff"}' (json or a .json file) | --hue <deg> | --brand '<#primary>[,#secondary]' | --mono <#hex>`
 
 const PW = '1.63.0'
 const CACHE = path.join(os.homedir(), '.cache', 'fun-isometric')
@@ -68,7 +68,7 @@ async function bundle() {
   fs.writeFileSync(
     entry,
     `import * as mod from ${JSON.stringify(mod)}
-import { RISO, brand, draw, hue, mono } from ${JSON.stringify(kit)}
+import { PALETTES, RISO, brand, draw, hue, mono } from ${JSON.stringify(kit)}
 const icons = [...new Set(Object.values(mod).flatMap((v) => (Array.isArray(v) ? v : [v])))].filter((v) => v && typeof v === 'object' && 'layers' in v && 'frames' in v)
 const cv = document.createElement('canvas')
 let palette
@@ -76,7 +76,8 @@ const NUM = /-?(?:\\d+\\.?\\d*|\\.\\d+)(?:e[-+]?\\d+)?/gi
 Object.assign(window, {
   icons: icons.map((i) => ({ name: i.name, frames: i.frames, still: i.still ?? 0 })),
   colours(spec) {
-    palette = spec.palette ?? (spec.hue != null ? hue(spec.hue) : spec.brand ? brand(spec.brand) : spec.mono ? mono(spec.mono) : undefined)
+    if (typeof spec.palette === 'string' && !(spec.palette in PALETTES)) throw new Error('no palette ' + spec.palette + ', try ' + Object.keys(PALETTES).join(' '))
+    palette = (typeof spec.palette === 'string' ? PALETTES[spec.palette] : spec.palette) ?? (spec.hue != null ? hue(spec.hue) : spec.brand ? brand(...spec.brand.split(/[ ,]+/)) : spec.mono ? mono(spec.mono) : undefined)
   },
   // what the type system cannot see: dangling ids, unknown slots, morphs whose commands drift, loops that do not divide the icon
   lint(name) {
@@ -166,7 +167,8 @@ await page.setContent(`<!doctype html><body style="margin:0"><script type="modul
 await page.waitForFunction(() => window.icons)
 const all = await page.evaluate(() => window.icons)
 const spec = {
-  palette: typeof flags.palette === 'string' ? JSON.parse(fs.existsSync(flags.palette) ? fs.readFileSync(flags.palette, 'utf8') : flags.palette) : undefined,
+  // a set's name, inline json or a json file
+  palette: typeof flags.palette !== 'string' ? undefined : /^[a-z]+$/.test(flags.palette) ? flags.palette : JSON.parse(fs.existsSync(flags.palette) ? fs.readFileSync(flags.palette, 'utf8') : flags.palette),
   hue: flags.hue !== undefined ? Number(flags.hue) : undefined,
   brand: flags.brand,
   mono: flags.mono,

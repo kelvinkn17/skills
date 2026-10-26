@@ -4,18 +4,25 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "rm -rf dist && vite build && cd .. && git ls-files -co --exclude-standard fun-isometric | zip -qX fun-isometric/dist/fun-isometric/fun-isometric.zip -@",
     "preview": "vite preview",
     "deploy": "bunx vercel@latest build --prod && bunx vercel@latest deploy --prebuilt --prod"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/geist-mono": "5.3.0",
+    "@heroui/react": "3.2.6",
+    "@heroui/styles": "3.2.6",
+    "@vercel/analytics": "2.0.1",
+    "@vercel/speed-insights": "2.0.0",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "tailwind-variants": "3.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.1.2",
+    "tailwindcss": "4.3.3",
     "vite": "8.3.5"
   }
 }

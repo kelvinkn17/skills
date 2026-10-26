@@ -1,0 +1,84 @@
+/* HeroUI's controls compiled on their own: its theme is referenced, never emitted, so nothing reaches :root and a host app's Tailwind stays as it was. */
+@reference "@heroui/styles";
+@import "../node_modules/@heroui/styles/dist/components/label.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/description.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/input.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/textfield.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/popover.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/list-box.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/list-box-item.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/select.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/toggle-button.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/toggle-button-group.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/slider.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/color-swatch.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/color-area.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/color-slider.css" layer(components);
+@import "../node_modules/@heroui/styles/dist/components/color-picker.css" layer(components);
+
+/* HeroUI's tokens on the page's palette, literal since popovers portal outside the page: grey fills, ink when picked, no rings */
+@layer components {
+  .show-fun,
+  .fi-pop {
+    --spacing: 0.25rem;
+    --radius: 0.75rem;
+    --radius-3xl: calc(var(--radius) * 3);
+    --text-xs: 0.75rem;
+    --text-xs--line-height: calc(1 / 0.75);
+    --text-sm: 0.875rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: 1.5;
+    --font-weight-medium: 500;
+    --ease-smooth: ease;
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+    --ease-out-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+    --default-transition-duration: 150ms;
+    --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    --color-white: #fff;
+    --color-black: #000;
+    --cursor-interactive: pointer;
+    --cursor-disabled: not-allowed;
+    --disabled-opacity: 0.4;
+    --ring-offset-width: 2px;
+    --scrollbar-width: thin;
+    --scrollbar-gutter: auto;
+    --scrollbar-color: auto;
+
+    --foreground: #0b0b0c;
+    --background: #fff;
+    --muted: #66666c;
+    --border: #e4e4e8;
+    --danger: #e5484d;
+    --focus: #0b0b0c;
+    --default: #ebebee;
+    --default-hover: #e2e2e6;
+    --default-foreground: #0b0b0c;
+    --accent: #0b0b0c;
+    --accent-foreground: #fff;
+    --accent-soft: #ebebee;
+    --accent-soft-hover: #e2e2e6;
+    --accent-soft-foreground: #0b0b0c;
+    --segment: #fff;
+    --segment-foreground: #0b0b0c;
+    --overlay: #fff;
+    --overlay-shadow: 0 12px 32px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06);
+    --surface-shadow: none;
+    --field-background: #fff;
+    --field-foreground: #0b0b0c;
+    --field-placeholder: #66666c;
+    --field-border: transparent;
+    --field-border-hover: transparent;
+    --field-border-focus: transparent;
+    --field-hover: #fff;
+    --field-focus: #fff;
+    --field-radius: 16px;
+    --field-shadow: none;
+    --border-width-field: 0px;
+  }
+  .fi-pop {
+    font-family: var(--fun-text, 'Geist Variable', system-ui, sans-serif);
+    letter-spacing: -0.02em;
+  }
+}

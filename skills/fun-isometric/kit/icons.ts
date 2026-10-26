@@ -1,7 +1,7 @@
 // The fun-isometric set: everyday product icons drawn as slabs, each moving on one preset.
 import { VIEWS, arc, ellipse, line, onFace, pill, poly, rect, ring, spark, star, view } from './fun'
-import { SNAP, bob, bounce, clasp, deal, drift, erase, fall, flicker, float, glint, hop, impact, jolt, latch, look, nudge, press, shackle, slide, sparkle, springTurn, sway, toss, tossLag, tossLag2, twinkle, twist, wiggle, wobble } from './motions'
-import type { Icon, Layer, Motion, Shape, Vec } from './fun'
+import { EASY, SNAP, bob, bounce, clasp, deal, drift, erase, fall, flicker, float, glint, hop, impact, jolt, latch, look, press, shackle, slide, sparkle, springTurn, sway, toss, tossLag, tossLag2, twinkle, twist, wiggle, wobble } from './motions'
+import type { Icon, Layer, Motion, Shape, Track, Vec } from './fun'
 
 // colours are palette slots, so draw(..., palette) or play(..., { palette }) recolours the whole set
 const LINE = 5
@@ -430,35 +430,85 @@ export const play: Icon = {
   ],
 }
 
-// a coin drops through the slot and the pig takes the hit; the next coin pops in above before the loop comes round
-const PIG: Vec = [-10, 24]
-const SLOT = onFace(PIG, [-14, -102])
-const DROP_COIN: ReadonlyArray<Shape> = [{ d: ellipse(0, 0, 26, 44), fill: 'gold', depth: 0.6 }, { d: ellipse(0, 0, 14, 28) }]
+// A loop de loop written across the pad, in face space, sampled densely so the nib can be keyed onto it
+const LOOPS = 4
+const SCRIBBLE: Array<Vec> = (() => {
+  const [from, to] = [-Math.PI / 2, LOOPS * 2 * Math.PI + 0.7]
+  const pts = Array.from({ length: 721 }, (_, i): Vec => {
+    const t = from + ((to - from) * i) / 720
+    const tall = 30 * (1 + 0.14 * Math.sin(t / 2.6))
+    const x = 5.6 * t + 15 * Math.sin(t)
+    return [x, tall * Math.cos(t) - 0.14 * x]
+  })
+  const mid = (pts[0][0] + pts[720][0]) / 2
+  return pts.map(([x, y]) => [x - mid, y + 4])
+})()
+// on screen the pad leans, so speed and trims are measured after the tilt
+const SEEN = SCRIBBLE.map((p) => onFace(FACE, p))
+const RUN = SEEN.reduce<Array<number>>((acc, p, i) => (acc.push(i ? acc[i - 1] + Math.hypot(p[0] - SEEN[i - 1][0], p[1] - SEEN[i - 1][1]) : 0), acc), [])
+const [WRITE, DONE, PIECES] = [16, 118, 8]
+const frameAt = (s: number) => WRITE + ((DONE - WRITE) * s) / RUN[720]
+const nibAt = (s: number): Vec => {
+  let i = 1
+  while (i < 720 && RUN[i] < s) i++
+  const k = (s - RUN[i - 1]) / (RUN[i] - RUN[i - 1] || 1)
+  return [+(SEEN[i - 1][0] + (SEEN[i][0] - SEEN[i - 1][0]) * k).toFixed(2), +(SEEN[i - 1][1] + (SEEN[i][1] - SEEN[i - 1][1]) * k).toFixed(2)]
+}
+// cut into pieces with their own trims, so a trim's end never drifts from the nib on a long path
+const CUTS = Array.from({ length: PIECES + 1 }, (_, j) => RUN.findIndex((r) => r >= (RUN[720] * j) / PIECES))
+const INK: ReadonlyArray<Shape> = CUTS.slice(0, -1).map((c, j) => ({
+  d: line(...SCRIBBLE.slice(c, CUTS[j + 1] + 1)),
+  line: 7,
+  round: true,
+  trim: [[frameAt(RUN[c]), 0], [frameAt(RUN[CUTS[j + 1]]), 1], [178, 1, 0], [179, 0]],
+}))
+const SHINE = onFace(FACE, [104, -136])
+const START = SEEN[0]
+const END = SEEN[720]
+const LIFT: Vec = [12, -40]
+const HOVER: Vec = [START[0] + LIFT[0], START[1] + LIFT[1]]
+// the nib rides the line every two frames, rocking a little with each loop
+const NIB: Track<Vec> = [
+  [0, HOVER, EASY],
+  ...Array.from({ length: (DONE - WRITE) / 2 }, (_, i) => [WRITE + i * 2, nibAt((RUN[720] * i * 2) / (DONE - WRITE))] as const),
+  [DONE, END, EASY],
+  [DONE + 16, [END[0] + LIFT[0], END[1] + LIFT[1]], SNAP, [[-30, -40], [30, -40]]],
+  [168, HOVER],
+]
+const TURN: Track<number> = [
+  [0, 36, EASY],
+  [WRITE, 30],
+  ...Array.from({ length: (DONE - WRITE) / 2 - 1 }, (_, i) => [WRITE + (i + 1) * 2, 30 + 4 * Math.sin(((i + 1) * 2 * LOOPS * 2 * Math.PI) / (DONE - WRITE))] as const),
+  [DONE, 30, EASY],
+  [DONE + 16, 34, SNAP],
+  [168, 36],
+]
 
-export const piggy: Icon = {
-  name: 'piggy',
+export const pen: Icon = {
+  name: 'pen',
   frames: 180,
+  // the finished scribble, pen lifted and the sparkle out
+  still: 136,
   line: LINE,
   extrude: EXT,
   layers: [
-    { id: 'pig', a: [0, 90], p: [246, 360], m: { ...nudge, at: 24 }, shapes: [] },
-    { parent: 'pig', p: [SLOT[0], SLOT[1] - 96], op: 48, m: [fall([0, 92], 4, 24), twinkle(22, true)], shapes: DROP_COIN },
-    { parent: 'pig', p: [SLOT[0], SLOT[1] - 96], ip: 130, m: twinkle(130), shapes: DROP_COIN },
+    { id: 'desk', p: [224, 322], shapes: [] },
+    { parent: 'desk', tilt: FACE, shapes: [{ d: rect(-116, -116, 232, 232, 28), fill: 'tint', depth: 1 }] },
+    { parent: 'desk', tilt: FACE, a: [0, 4], p: onFace(FACE, [0, 4]), m: twinkle(148, true), shapes: INK },
     {
-      parent: 'pig',
-      tilt: PIG,
+      parent: 'desk',
+      p: NIB,
+      r: TURN,
       shapes: [
-        ...[-70, 54].map((x): Shape => ({ d: rect(x, 40, 40, 70, 14), fill: 'main', depth: 0.8 })),
-        { d: ellipse(-6, -10, 136, 104), fill: 'main', depth: 1 },
-        { d: poly([[20, -100], [66, -142], [80, -86]], 10), fill: 'main', depth: 0.5 },
-        { d: ellipse(132, 6, 32, 38), fill: 'tint', depth: 0.6 },
-        ...[-10, 22].map((y): Shape => ({ d: ellipse(136, y + 1, 6, 9), fill: 'ink', line: false })),
-        { d: ellipse(72, -34, 9, 11), fill: 'ink', line: false },
-        { d: pill(-52, -108, 76, 16), fill: 'ink', line: false },
-        { d: 'M-142 -18C-170 -24 -176 -54 -156 -60C-138 -64 -138 -36 -160 -34', round: true },
+        { d: poly([[-21, -196], [21, -196], [21, -86], [-21, -86]], [20, 20, 0, 0]), fill: 'main', depth: 1 },
+        { d: rect(-21, -174, 42, 20), fill: 'deep', depth: 1 },
+        { d: rect(8, -168, 9, 58, 4.5), fill: 'grey', depth: 0.4 },
+        { d: rect(-21, -90, 42, 42, 6), fill: 'deep', depth: 1 },
+        { d: poly([[-19, -50], [19, -50], [4, -6], [-4, -6]], [4, 4, 3, 3]), fill: 'white', depth: 0.5 },
+        { d: ellipse(0, -6, 5.5), fill: 'ink', line: false },
       ],
     },
-    glow('pig', [SLOT[0] + 84, SLOT[1] - 30], 24, [twinkle(30), twinkle(104, true)]),
+    glow('desk', SHINE, 26, [twinkle(DONE + 4), twinkle(150, true)]),
   ],
 }
 
@@ -529,32 +579,33 @@ export const headphones: Icon = {
   ],
 }
 
-const CUP = 'M-94 -96L94 -96C94 -6 52 34 0 38C-52 34 -94 -6 -94 -96Z'
+// one plane leaned back like the calendar, rim in the silhouette, so the side reads as thickness and not a shadow
+const CUP = 'M-100 -134L100 -134L100 -108L84 -108C84 -10 48 30 0 34C-48 30 -84 -10 -84 -108L-100 -108Z'
 
 export const trophy: Icon = {
   name: 'trophy',
   frames: 180,
   line: LINE,
-  extrude: [-3, 16],
+  extrude: EXT,
   layers: [
-    { id: 'cup', p: [250, 278], m: hop, shapes: [] },
+    { id: 'cup', p: [250, 266], m: hop, shapes: [] },
     {
       parent: 'cup',
+      tilt: FACE,
       shapes: [
-        ...[-1, 1].map((side): Shape => ({ d: ring(side * 96, -54, 44, 26), fill: 'gold', depth: 0.6 })),
-        { d: rect(-18, 30, 36, 46), fill: 'gold', depth: 0.8 },
-        { d: rect(-78, 70, 156, 54, 12), fill: 'deep', depth: 1 },
-        { d: rect(-42, 82, 84, 24, 6), fill: 'white', depth: 0.2 },
+        ...[-1, 1].map((side): Shape => ({ d: ring(side * 88, -60, 44, 24), fill: 'gold', depth: 0.6 })),
         { d: CUP, fill: 'gold', depth: 1 },
-        { d: ellipse(0, -96, 94, 22), fill: 'gold' },
-        { d: ellipse(0, -94, 76, 14), fill: 'hot' },
-        { d: star(0, -30, 32, 0.46, 5, 4), fill: 'white', depth: 0.3 },
+        { d: line([-84, -108], [84, -108]) },
+        { d: star(0, -46, 32, 0.46, 5, 4), fill: 'white' },
+        { d: rect(-16, 30, 32, 38), fill: 'gold', depth: 1 },
+        { d: rect(-76, 64, 152, 56, 12), fill: 'deep', depth: 1 },
+        { d: rect(-42, 81, 84, 22, 6), fill: 'white' },
       ],
     },
-    glow('cup', [128, -140], 30, twinkle(0, true), { op: 30 }),
-    glow('cup', [128, -140], 30, twinkle(54), { ip: 54 }),
-    glow('cup', [-142, 30], 18, twinkle(6, true), { op: 36 }),
-    glow('cup', [-142, 30], 18, twinkle(62), { ip: 62 }),
+    glow('cup', [138, -132], 30, twinkle(0, true), { op: 30 }),
+    glow('cup', [138, -132], 30, twinkle(54), { ip: 54 }),
+    glow('cup', [-150, 20], 18, twinkle(6, true), { op: 36 }),
+    glow('cup', [-150, 20], 18, twinkle(62), { ip: 62 }),
   ],
 }
 
@@ -627,25 +678,26 @@ export const bulb: Icon = {
   name: 'bulb',
   frames: 180,
   line: LINE,
-  extrude: [-3, 16],
+  extrude: EXT,
   layers: [
-    { id: 'lamp', a: [0, 130], p: [250, 376], m: hop, shapes: [] },
+    { id: 'lamp', a: [0, 120], p: [250, 372], m: hop, shapes: [] },
     {
       parent: 'lamp',
+      tilt: FACE,
       shapes: [
-        { d: rect(-22, 108, 44, 22, 10), fill: 'deep', depth: 0.6 },
-        { d: rect(-42, 86, 84, 26, 9), fill: 'grey', depth: 0.8 },
-        { d: rect(-48, 60, 96, 30, 9), fill: 'grey', depth: 0.8 },
         { d: BULB, fill: 'gold', depth: 1 },
         { d: line([-34, -24], [-17, -46], [0, -24], [17, -46], [34, -24]), round: true },
         { d: line([-34, -24], [-30, 44]) },
         { d: line([34, -24], [30, 44]) },
         { d: arc(0, -48, 70, 196, 246) },
+        { d: rect(-50, 60, 100, 28, 9), fill: 'grey', depth: 0.8 },
+        { d: rect(-44, 84, 88, 26, 9), fill: 'grey', depth: 0.8 },
+        { d: rect(-24, 106, 48, 22, 10), fill: 'deep', depth: 0.6 },
       ],
     },
-    glow('lamp', [-122, -122], 26, [twinkle(36), twinkle(120, true)]),
-    glow('lamp', [124, -136], 30, [twinkle(42), twinkle(126, true)]),
-    glow('lamp', [138, -20], 16, [twinkle(48), twinkle(132, true)]),
+    glow('lamp', [-126, -132], 26, [twinkle(36), twinkle(120, true)]),
+    glow('lamp', [134, -150], 30, [twinkle(42), twinkle(126, true)]),
+    glow('lamp', [150, -34], 16, [twinkle(48), twinkle(132, true)]),
   ],
 }
 
@@ -683,4 +735,4 @@ export const battery: Icon = {
   ],
 }
 
-export const ICONS: ReadonlyArray<Icon> = [folder, heart, coins, bell, calendar, padlock, gift, plane, search, chat, phone, toggle, streak, notes, play, piggy, mailbox, headphones, trophy, camera, pin, cloud, bulb, battery]
+export const ICONS: ReadonlyArray<Icon> = [pen, folder, heart, coins, bell, calendar, padlock, gift, plane, search, chat, phone, toggle, streak, notes, play, mailbox, headphones, trophy, camera, pin, cloud, bulb, battery]

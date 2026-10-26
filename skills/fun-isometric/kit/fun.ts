@@ -24,6 +24,16 @@ export type Motion = {
 export type Palette = { main: string; gold: string; tint: string; ok: string; hot: string; deep: string; white: string; grey: string; paper: string; ink: string }
 export const RISO: Palette = { main: '#ff58a8', gold: '#ffe14a', tint: '#ffd4e8', ok: '#15b9a6', hot: '#ff7a1a', deep: '#2b50e0', white: '#ffffff', grey: '#cccccc', paper: '#f7f7f7', ink: '#000000' }
 export const ACCENTS = ['main', 'gold', 'tint', 'ok', 'hot', 'deep'] as const
+// named sets, each a whole palette so a sticker keeps its contrast in any of them
+export const PALETTES = {
+  riso: RISO,
+  candy: { ...RISO, main: '#b49bff', gold: '#ffd9a8', tint: '#ece5ff', ok: '#7fdcc0', hot: '#ff8fb1', deep: '#6a5cff' },
+  matcha: { ...RISO, main: '#6cc46f', gold: '#f2d16b', tint: '#e2f4d6', ok: '#2bb39a', hot: '#ff8a5b', deep: '#1f6b55' },
+  sunset: { ...RISO, main: '#ff7a3d', gold: '#ffc94a', tint: '#ffe2d1', ok: '#2ec4b6', hot: '#ff4d6d', deep: '#6b2d91' },
+  clay: { ...RISO, main: '#f0845f', gold: '#f4c463', tint: '#fde3d6', ok: '#7fb894', hot: '#e0533d', deep: '#3d5a80' },
+  aqua: { ...RISO, main: '#22c3d3', gold: '#ffd75e', tint: '#d3f4f7', ok: '#3fc46a', hot: '#ff6f61', deep: '#0f5f73' },
+} satisfies Record<string, Palette>
+export type PaletteName = keyof typeof PALETTES
 // a slot, so the colour follows the palette it is drawn with, or a fixed hex
 export type Swatch = keyof Palette | `#${string}`
 
@@ -485,10 +495,12 @@ export function hue(deg: number, from: Palette = RISO): Palette {
   return out
 }
 
-/** The brand as the main colour, with a deep shade and a pale tint of it; gold, ok and hot keep their meaning. */
-export function brand(color: string, from: Palette = RISO): Palette {
-  const [, C, H] = lch(color)
-  return { ...from, main: color, deep: hex([0.45, C, H]), tint: hex([0.9, Math.min(C, 0.07), H]) }
+/** Two brand colours and their shades fill every accent: primary on bodies, tints and hearts, secondary on dark parts, coins and checks. */
+export function brand(primary: string, secondary?: string, from: Palette = RISO): Palette {
+  const [, C, H] = lch(primary)
+  const two = secondary ?? hex([0.42, C, H])
+  const [, C2, H2] = lch(two)
+  return { ...from, main: primary, tint: hex([0.93, Math.min(C, 0.06), H]), hot: hex([0.6, C, H]), deep: two, gold: hex([0.86, Math.min(C2, 0.12), H2]), ok: hex([0.7, C2, H2]) }
 }
 
 /** One hue at six lightnesses for a single colour set; parts stay apart by lightness and the outlines do the rest. */
