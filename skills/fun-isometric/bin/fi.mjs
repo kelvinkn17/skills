@@ -56,7 +56,8 @@ async function browser() {
     return await pw.chromium.launch()
   } catch (e) {
     if (!/Executable doesn't exist|playwright install/i.test(e.message)) throw e
-    spawnSync('node', [path.join(dir, 'cli.js'), 'install', 'chromium'], { stdio: 'inherit' })
+    // Bun, not node: node's happy eyeballs aborts this download on networks with broken IPv6
+    if (spawnSync(process.execPath, [path.join(dir, 'cli.js'), 'install', 'chromium'], { stdio: 'inherit' }).status) die('chromium install failed')
     return pw.chromium.launch()
   }
 }
