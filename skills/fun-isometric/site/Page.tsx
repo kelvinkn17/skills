@@ -401,7 +401,7 @@ export default function Page({ className, children }: { className?: string; chil
         <nav className="fi-links" aria-label="Site">
           <a href="#make">Make</a>
           <a href="#examples">Examples</a>
-          <a className="fi-btn fi-hub" href={REPO} onClick={() => track('Open GitHub', { from: 'nav' })}>
+          <a className="fi-btn fi-hub" href={REPO} target="_blank" rel="noopener" onClick={() => track('Open GitHub', { from: 'nav' })}>
             GitHub
           </a>
           <a className="fi-btn fi-follow" href={MAKER.follow} target="_blank" rel="noopener" aria-label={`Follow ${MAKER.name} on X`} onClick={() => track('Follow on X')}>
@@ -459,7 +459,7 @@ export default function Page({ className, children }: { className?: string; chil
         <p>
           MIT licensed. Made by <a href="https://www.klvn.dev">Kelvin</a>, heavily inspired by <a href="https://slush.app">Slush</a>.
         </p>
-        <a href={REPO} onClick={() => track('Open GitHub', { from: 'footer' })}>
+        <a href={REPO} target="_blank" rel="noopener" onClick={() => track('Open GitHub', { from: 'footer' })}>
           Source on GitHub
         </a>
       </footer>
