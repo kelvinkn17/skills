@@ -1,0 +1,509 @@
+/* fun-isometric site: white page, grey tiles that step by luminance, Geist with tight tracking, one pink gel. The stickers carry the colour. */
+@layer components {
+  .show-fun {
+    --paper: #ffffff;
+    --card: #f4f4f6;
+    --card-2: #ebebee;
+    --ink: #0b0b0c;
+    --muted: #66666c;
+    --gel: #ff58a8;
+    --gel-top: #ff86c0;
+    --mono: 'Geist Mono Variable', ui-monospace, monospace;
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --fi-tint: #ffd4e8;
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 0 16px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--fun-text, 'Geist Variable', system-ui, sans-serif);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+    font-feature-settings: 'ss01';
+  }
+  .show-fun * {
+    box-sizing: border-box;
+  }
+  .show-fun a {
+    color: inherit;
+  }
+  .show-fun :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* nav */
+  .show-fun .fi-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .show-fun .fi-word {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+  }
+  .show-fun .fi-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 14px;
+  }
+  .show-fun .fi-links a:not(.fi-btn) {
+    text-decoration: none;
+    transition: opacity 150ms var(--ease);
+  }
+  .show-fun .fi-links a:not(.fi-btn):hover {
+    opacity: 0.6;
+  }
+
+  /* buttons: grey pills, the gel is the one accent, its light inside */
+  .show-fun .fi-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    height: 36px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--card-2);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms var(--ease), opacity 150ms var(--ease);
+  }
+  .show-fun .fi-btn:hover {
+    background: #e2e2e6;
+  }
+  .show-fun .fi-btn[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .show-fun .fi-gel {
+    background: linear-gradient(var(--gel-top), var(--gel));
+    color: #000;
+    box-shadow: inset 0 1px 3px rgb(255 255 255 / 0.45), inset 0 3px 12px rgb(255 255 255 / 0.2);
+  }
+  .show-fun .fi-gel:hover {
+    background: linear-gradient(#ff9acb, #ff6cb2);
+  }
+  .show-fun .fi-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* hero: copy left, one emblem on a grey stage right */
+  .show-fun .fi-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 16px 48px;
+    padding: 56px 0 96px;
+  }
+  .show-fun .fi-display {
+    margin: 0 0 28px;
+    font-size: clamp(44px, 6.4vw, 84px);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+    text-wrap: balance;
+  }
+  .show-fun .fi-lede {
+    max-width: 30em;
+    margin: 0 0 32px;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .show-fun .fi-hero-art {
+    border-radius: 32px;
+    background: var(--card);
+    padding: 6%;
+  }
+
+  /* a command line with its copy button inside */
+  .show-fun .fi-command {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    border-radius: 20px;
+    background: var(--card);
+    padding: 8px 8px 8px 20px;
+  }
+  .show-fun .fi-command code {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .show-fun .fi-hero-command {
+    max-width: 560px;
+  }
+  .show-fun .fi-code code {
+    white-space: pre;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  /* sections */
+  .show-fun .fi-sec {
+    padding: 0 0 120px;
+  }
+  .show-fun .fi-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px 40px;
+    margin-bottom: 32px;
+  }
+  .show-fun .fi-h2 {
+    margin: 0;
+    font-size: clamp(32px, 3.6vw, 48px);
+    font-weight: 400;
+    line-height: 1.04;
+    letter-spacing: -0.05em;
+  }
+  .show-fun .fi-meta {
+    max-width: 30em;
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .show-fun .fi-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .show-fun .fi-tile .fi-name {
+    text-transform: capitalize;
+  }
+  .show-fun .fi-frame {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* segmented control: grey track, the picked one lifts white */
+  .show-fun .fi-seg {
+    display: inline-flex;
+    gap: 2px;
+    border-radius: 9999px;
+    background: var(--card);
+    padding: 3px;
+  }
+  .show-fun .fi-seg button {
+    height: 30px;
+    padding: 0 14px;
+    white-space: nowrap;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 150ms var(--ease), color 150ms var(--ease);
+  }
+  .show-fun .fi-seg button:hover {
+    color: var(--ink);
+  }
+  .show-fun .fi-seg button[aria-pressed='true'] {
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 2px 6px rgb(0 0 0 / 0.05);
+  }
+
+  /* generator */
+  .show-fun .fi-maker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: 16px;
+  }
+  .show-fun .fi-fields {
+    display: grid;
+    align-content: start;
+    gap: 28px;
+    border-radius: 32px;
+    background: var(--card);
+    padding: clamp(20px, 3vw, 36px);
+  }
+  .show-fun .fi-field {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+  .show-fun .fi-label {
+    padding: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .show-fun .fi-input {
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--paper);
+    padding: 0 16px;
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+  }
+  .show-fun select.fi-input {
+    appearance: none;
+    background: var(--paper)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%230b0b0c' stroke-width='1.6'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E")
+      no-repeat right 16px center;
+  }
+  .show-fun .fi-fields .fi-seg {
+    justify-self: start;
+    background: var(--card-2);
+  }
+  .show-fun .fi-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .show-fun .fi-chip {
+    height: 30px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--card-2);
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 150ms var(--ease);
+  }
+  .show-fun .fi-chip:hover {
+    background: #e2e2e6;
+  }
+  .show-fun .fi-tune {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    min-height: 32px;
+  }
+  .show-fun .fi-tune input[type='color'] {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 9999px;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .show-fun .fi-tune input[type='range'] {
+    width: 180px;
+    accent-color: var(--ink);
+  }
+  .show-fun .fi-swatches {
+    display: flex;
+  }
+  .show-fun .fi-swatches i {
+    width: 22px;
+    height: 22px;
+    margin-right: -5px;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 2px var(--card);
+  }
+  .show-fun .fi-views {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .show-fun .fi-view {
+    display: grid;
+    gap: 2px;
+    border: 0;
+    border-radius: 20px;
+    background: var(--paper);
+    padding: 8px 8px 12px;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 150ms var(--ease), color 150ms var(--ease);
+  }
+  .show-fun .fi-view[aria-pressed='true'] {
+    background: var(--fi-tint);
+    color: var(--ink);
+  }
+  .show-fun .fi-out {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 16px;
+  }
+  .show-fun .fi-stage {
+    display: grid;
+    place-items: center;
+    border-radius: 32px;
+    background: var(--card);
+    padding: 8%;
+  }
+  .show-fun .fi-stage canvas {
+    max-width: 440px;
+  }
+  .show-fun .fi-out .fi-command {
+    border-radius: 24px;
+    padding-left: 24px;
+  }
+
+  /* sticker wall */
+  .show-fun .fi-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+  }
+  .show-fun .fi-scrub {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .show-fun .fi-scrub input {
+    width: 160px;
+    accent-color: var(--ink);
+  }
+  .show-fun .fi-wall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 44%), 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .show-fun .fi-tile {
+    display: grid;
+    gap: 2px;
+    border-radius: 24px;
+    background: var(--card);
+    padding: 8px 20px 20px;
+  }
+  .show-fun .fi-tile canvas {
+    margin: 0 -8px 4px;
+    width: calc(100% + 16px) !important;
+  }
+
+  /* three cards: art on grey, the caption under it */
+  .show-fun .fi-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .show-fun .fi-cards p {
+    max-width: 26em;
+    margin: 24px 0 0;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  .show-fun .fi-cards strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .show-fun .fi-card-art {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: 24px;
+    background: var(--card);
+    padding: 12%;
+  }
+  .show-fun .fi-trio {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    padding: 6%;
+  }
+  .show-fun .fi-trio canvas {
+    scale: 1.4;
+  }
+
+  /* install */
+  .show-fun .fi-install {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 32px 96px;
+    align-items: start;
+  }
+  .show-fun .fi-steps {
+    display: grid;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .show-fun .fi-steps li {
+    display: grid;
+    gap: 10px;
+  }
+
+  .show-fun .fi-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding: 28px 0 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .show-fun .fi-foot p {
+    margin: 0;
+  }
+
+  @media (max-width: 860px) {
+    .show-fun .fi-hero,
+    .show-fun .fi-maker,
+    .show-fun .fi-install {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .show-fun .fi-hero {
+      padding: 24px 0 72px;
+    }
+    .show-fun .fi-cards {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+    .show-fun .fi-sec {
+      padding-bottom: 88px;
+    }
+    .show-fun .fi-links a:not(.fi-btn) {
+      display: none;
+    }
+    .show-fun .fi-views {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .show-fun .fi-scrub input {
+      width: 120px;
+    }
+    .show-fun .fi-seg button {
+      padding: 0 10px;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "kelvinkn17-skills",
+  "owner": { "name": "kelvinkn17" },
+  "description": "Agent skills by kelvinkn17",
+  "plugins": [
+    {
+      "name": "fun-isometric",
+      "source": "./",
+      "strict": false,
+      "description": "Isometric stickers drawn and animated on real keyframes, in any palette",
+      "skills": ["./skills/fun-isometric"]
+    }
+  ]
+}
