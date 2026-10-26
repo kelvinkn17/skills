@@ -1,5 +1,7 @@
 # skills
 
+[![skills.sh](https://www.skills.sh/b/kelvinkn17/skills)](https://www.skills.sh/kelvinkn17/skills)
+
 Agent skills I build and use. Each lives in `skills/<name>/` with its `SKILL.md` and everything it runs.
 
 | Skill | What it does |
@@ -14,8 +16,14 @@ fun-isometric is heavily inspired by the stickers in [Slush](https://slush.app).
 npx skills add kelvinkn17/skills@fun-isometric
 ```
 
-The CLI asks which agents to add it to (Claude Code, Codex, Cursor and more) and whether it goes in every project. Start a new
-session, then ask for `/fun-isometric`, or `$fun-isometric` in Codex.
+It needs Node 22 or newer. The CLI asks which agents to add it to (Claude Code, Codex, Cursor and more) and whether it goes in
+every project. Start a new session, then ask for `/fun-isometric`, or `$fun-isometric` in Codex.
+
+The site publishes an [agent-skills index](https://skills.klvn.dev/.well-known/agent-skills/index.json), so this works too:
+
+```sh
+npx skills add https://skills.klvn.dev
+```
 
 Or download [fun-isometric.zip](https://skills.klvn.dev/fun-isometric/fun-isometric.zip) and unzip it into your skills folder:
 

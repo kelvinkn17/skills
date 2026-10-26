@@ -79,7 +79,7 @@ function CopyButton({ text, what, disabled }: { text: string; what: 'install' | 
 function Install() {
   return (
     <div className="fi-install" id="install">
-      <p className="fi-label">Add it to Claude Code, Codex or any agent with one command.</p>
+      <p className="fi-label">Add it to Claude Code, Codex or any agent with one command, on Node 22 or newer.</p>
       <div className="fi-command">
         <code>{INSTALL}</code>
         <CopyButton text={INSTALL} what="install" />

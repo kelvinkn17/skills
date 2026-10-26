@@ -1,0 +1,18 @@
+# fun-isometric
+
+> An agent skill for Claude Code, Codex and other agents that draws any object as an isometric sticker (flat fill, thick black outline, extruded slab side) and animates it on After Effects grade keyframe presets. Six named palettes or two brand colours, four facings. Stickers play live on canvas in a web app or export to looping alpha video.
+
+Made by Kelvin Adithya (https://x.com/KelvinAdithya), heavily inspired by the stickers in Slush (https://slush.app). MIT licensed.
+
+Install with `npx skills add kelvinkn17/skills@fun-isometric` on Node 22 or newer; the CLI asks which agents get it and whether it goes in every project. `npx skills add https://skills.klvn.dev` installs the same skill through this site's agent-skills index. Without Node, download the zip below and run `unzip fun-isometric.zip -d ~/.claude/skills`. Then ask for `/fun-isometric <object>`, or `$fun-isometric` in Codex. Rendering needs Bun, and video needs ffmpeg.
+
+## Docs
+
+- [SKILL.md](https://raw.githubusercontent.com/kelvinkn17/skills/main/skills/fun-isometric/SKILL.md): the instructions the agent follows, with the drawing, colour and motion rules
+- [README](https://raw.githubusercontent.com/kelvinkn17/skills/main/README.md): every install route
+- [Generator](https://skills.klvn.dev/fun-isometric): pick an object, motion, palette and facing, then copy the command
+
+## Optional
+
+- [fun-isometric.zip](https://skills.klvn.dev/fun-isometric/fun-isometric.zip): the skill folder for a manual install
+- [Source](https://github.com/kelvinkn17/skills/tree/main/skills/fun-isometric): the kit, the fi tool and this site

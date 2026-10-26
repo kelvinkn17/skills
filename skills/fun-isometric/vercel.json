@@ -1,8 +1,12 @@
 {
   "trailingSlash": false,
   "redirects": [
-    { "source": "/(.*)", "has": [{ "type": "host", "value": "fun-isometric.klvn.dev" }], "destination": "https://skills.klvn.dev/fun-isometric", "permanent": true },
-    { "source": "/", "destination": "/fun-isometric", "permanent": false }
+    {"source": "/(.*)", "has": [{"type": "host", "value": "fun-isometric.klvn.dev"}], "destination": "https://skills.klvn.dev/fun-isometric", "permanent": true},
+    {"source": "/", "destination": "/fun-isometric", "permanent": false}
   ],
-  "rewrites": [{ "source": "/fun-isometric", "destination": "/fun-isometric/index.html" }]
+  "rewrites": [
+    {"source": "/fun-isometric", "destination": "/fun-isometric/index.html"},
+    {"source": "/llms.txt", "destination": "/fun-isometric/llms.txt"},
+    {"source": "/.well-known/agent-skills/:path*", "destination": "/fun-isometric/.well-known/agent-skills/:path*"}
+  ]
 }

@@ -2,6 +2,10 @@
 name: fun-isometric
 description: Draws fun, sharp isometric stickers (flat fill, thick black outline, extruded slab side) and animates them on a library of After Effects grade keyframe presets, replayed exactly the way lottie-web plays them, so the motion is fluid character animation and never a made up wobble. Any palette (six named sets with Riso by default, two brand colours, one colour, hue shift, custom slots) and four facing directions. Produces icon modules that play live on canvas in any web app (a React component ships with the kit) and export to looping alpha video (webm, HEVC mp4) with a poster. Use for "/fun-isometric", "animated sticker icons", "fun isometric icons", "Lottie style icons", "onboarding illustrations that move", or any request for playful animated icons, empty state art or feature stickers.
 license: MIT
+compatibility: Rendering, checks and video export run on Bun and ffmpeg; Playwright Chromium installs itself on first use. Live stickers need a web page with canvas.
+metadata:
+  author: Kelvin Adithya
+  homepage: https://skills.klvn.dev/fun-isometric
 ---
 
 # fun-isometric

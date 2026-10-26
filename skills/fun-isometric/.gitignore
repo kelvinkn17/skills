@@ -1,3 +1,4 @@
 .vercel
 .env*
 public/fun-isometric.zip
+public/.well-known/
